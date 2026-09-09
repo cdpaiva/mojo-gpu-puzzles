@@ -27,11 +27,15 @@ comptime dtype = DType.float32
 def add_10(
     output: Pointer[Scalar[dtype], MutAnyOrigin],
     a: Pointer[Scalar[dtype], MutAnyOrigin],
+    size: Int32
 ):
     var i = thread_idx.x
     # FILL ME IN (roughly 1 line)
-
-
+    # Bounds check could be skipped here
+    if i < Int(size):
+        output.unsafe_offset(i).unsafe_store(
+            a.unsafe_offset(i).unsafe_load() + 10.0
+        )
 # ANCHOR_END: add_10
 
 
@@ -48,6 +52,7 @@ def main() raises:
         ctx.enqueue_function[add_10](
             out,
             a,
+            Int32(SIZE),
             grid_dim=BLOCKS_PER_GRID,
             block_dim=THREADS_PER_BLOCK,
         )
