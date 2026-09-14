@@ -32,6 +32,10 @@ def add_10_blocks(
     var size = Int(size_dev)
     var i = block_dim.x * block_idx.x + thread_idx.x
     # FILL ME IN (roughly 2 lines)
+    if i < size:
+        output.unsafe_offset(i).unsafe_store(
+            a.unsafe_offset(i).unsafe_load() + 10.0
+        )
 
 
 # ANCHOR_END: add_10_blocks
