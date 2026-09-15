@@ -51,7 +51,10 @@ def add_10_shared_tile_tensor[
     var local_i = thread_idx.x
 
     if global_i < size:
-        shared[local_i] = rebind[Scalar[dtype]](a[global_i])
+        # just to exemplify shared memory, each thread changes the idx
+        # that will be accessed by another thread in that block
+        var next_i = (local_i + 1) % TPB
+        shared[next_i] = a[next_i]
 
     # Note: barrier is not strictly needed here since each thread only accesses
     # its own shared memory location. However, it's included to teach proper
@@ -60,6 +63,7 @@ def add_10_shared_tile_tensor[
     barrier()
 
     # FILL ME IN (roughly 2 lines)
+    output[global_i] = shared[local_i] + 10.0
 
 
 # ANCHOR_END: add_10_shared
