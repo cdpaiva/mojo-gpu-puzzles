@@ -48,6 +48,16 @@ def pooling[
     var global_i = block_dim.x * block_idx.x + thread_idx.x
     var local_i = thread_idx.x
     # FILL ME IN (roughly 10 lines)
+    # load thread's element into shared mem
+    if global_i < size:
+        shared[local_i] = a[local_i]
+    # sync
+    barrier()
+    # access elements loaded by other threads to calculate sum
+    for i in range(local_i - 2, local_i + 1):
+        if i < 0:
+            continue
+        output[local_i] += shared[i]
 
 
 # ANCHOR_END: pooling
