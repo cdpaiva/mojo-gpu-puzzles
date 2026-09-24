@@ -42,8 +42,28 @@ def dot_product[
 ) where (Engine.element_size == 1):
     var size = Int(size_dev)
     # FILL ME IN (roughly 13 lines)
-    ...
+    # alloc shared mem
+    var shared = stack_allocation[dtype=dtype, address_space=AddressSpace.SHARED](row_major[TPB]())
+    # populate it with a[i] * b[i]
+    var global_i = block_dim.x * block_idx.x + thread_idx.x
+    var local_i = thread_idx.x
 
+    if local_i < size:
+        shared[local_i] = a[local_i] * b[local_i]
+
+    # sync
+    barrier()
+
+    # parallel reduction:
+    while size > 1:
+        var half = size // 2
+        if local_i >= half:
+            shared[local_i - half] += shared[local_i]
+        barrier()
+        size /= 2
+    
+    if local_i == 0:
+        output[0] = shared[0]
 
 # ANCHOR_END: dot_product
 
